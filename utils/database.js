@@ -1,7 +1,7 @@
 import {} from 'dotenv/config'
 import mysql from 'mysql';
 
-const connection = mysql.createConnection({
+const pool = mysql.createPool({
     host: process.env.MYSQL_ADDON_HOST,
     port: process.env.MYSQL_ADDON_PORT,
     user: process.env.MYSQL_ADDON_USER,
@@ -9,4 +9,4 @@ const connection = mysql.createConnection({
     database: process.env.MYSQL_ADDON_DB
 })
 
-export default connection;
+export default pool;

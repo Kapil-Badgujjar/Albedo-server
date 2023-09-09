@@ -1,16 +1,22 @@
-import connection from '../utils/database.js';
+import pool from '../utils/database.js';
 
 async function getUser(email_id, password) {
     try {
-        const query = 'SELECT * FROM users WHERE email_id = ? AND password = ?';
         return new Promise((resolve, reject) => {
-            connection.connect();
-            connection.query(query, [email_id, password], (error, results) => {
-                connection.end();
-                if (error) {
-                    reject(error);
+            pool.getConnection((err,connection) => {
+                if(!err){
+                    connection.connect();
+                    const query = 'SELECT * FROM users WHERE email_id = ? AND password = ?';
+                    connection.query(query, [email_id, password], (error, results) => {
+                        connection.release();
+                        if (error) {
+                            reject(error);
+                        } else {
+                            resolve(results[0]);
+                        }
+                    });
                 } else {
-                    resolve(results[0]);
+                    throw err;
                 }
             });
         });
@@ -21,15 +27,21 @@ async function getUser(email_id, password) {
 
 async function addUser(email_id, password, username){
     try {
-        const query = 'INSERT INTO users(email_id, password, username, role) VALUES(?, ?, ?, ?)';
-            return new Promise((resolve, reject) => {
-                connection.connect();
-                connection.query(query, [email_id, password, username, "User"], (error, results) => {
-                    connection.end();
-                    if (error) {
-                        reject(error);
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err, connection) =>{
+                if(!err){
+                    connection.connect();
+                    const query = 'INSERT INTO users(email_id, password, username, role) VALUES(?, ?, ?, ?)';
+                        connection.query(query, [email_id, password, username, "User"], (error, results) => {
+                            connection.end();
+                            if (error) {
+                                reject(error);
+                            } else {
+                                resolve(results);
+                            }
+                        });
                     } else {
-                        resolve(results);
+                        throw err;
                     }
                 });
             });
@@ -40,16 +52,22 @@ async function addUser(email_id, password, username){
 
 async function editMyProfile(details){
     try {
-        const query = 'UPDATE users SET email_id = ?, password = ?, username = ? WHERE id = ?';
         return new Promise((resolve, reject) => {
-            connection.connect();
-            connection.query(query, [details.email_id, details.password, details.username, details.id], (error,results) => {
-                connection.end();
-                if(error){
-                    console.log(error);
-                    reject(error);
+            pool.getConnection((err, connection)=>{
+                if(!err) {
+                    connection.connect();
+                    const query = 'UPDATE users SET email_id = ?, password = ?, username = ? WHERE id = ?';
+                    connection.query(query, [details.email_id, details.password, details.username, details.id], (error,results) => {
+                        connection.end();
+                        if(error){
+                            console.log(error);
+                            reject(error);
+                        } else {
+                            resolve(results);
+                        }
+                    });
                 } else {
-                    resolve(results);
+                    throw err;
                 }
             });
         });
