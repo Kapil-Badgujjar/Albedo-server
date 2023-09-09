@@ -11,10 +11,6 @@ server.use(cors({
 }))
 server.use(express.json());
 server.use('/users', users);
-server.get('/', function(req, res){
-    console.log('Server called');
-    res.status(200).send({message: 'Server returned'});
-})
 
 server.listen(port, (err)=>{
     if(!err) console.log("server started on port " + port);
