@@ -12,7 +12,10 @@ async function getUser(email_id, password) {
                         if (error) {
                             reject(error);
                         } else {
-                            resolve(results[0]);
+                            if(results.length > 0)
+                                resolve({status: true, user: results[0]});
+                            else
+                                resolve({status: false, user: undefined});
                         }
                     });
                 } else {

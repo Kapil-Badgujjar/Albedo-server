@@ -6,16 +6,17 @@ import authenticateUser from '../middlewares/authenticateMiddleware.js';
 const router = express.Router();
 
 router.route('/login').post(async (req, res)=>{
+    console.log(req.body);
     try{
-        const user = await getUser(req.body.email_id,req.body.password);
-        if(user){
+        const {status, user} = await getUser(req.body.email_id,req.body.password);
+        if(status){
             user.password = undefined;
             user.albedoAccessToken= jwt.sign({...user}, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '30m'});
             res.status(200).send(user);
         }
-        else res.status(404);
+        else res.status(404).send({message: 'User Not found'});
     } catch(error){
-        res.status(500);
+        res.status(500).send({message: 'Internal Server Error'});
     }
 })
 
