@@ -1,5 +1,33 @@
 import pool from '../utils/database.js';
 
+async function getAllUsers() {
+    try {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err,connection) => {
+                if(!err){
+                    connection.connect();
+                    const query = 'SELECT * FROM users';
+                    connection.query(query, (error, results) => {
+                        connection.release();
+                        if (error) {
+                            reject(error);
+                        } else {
+                            if(results.length > 0)
+                                resolve({status: true, users: results});
+                            else
+                                resolve({status: false, users: undefined});
+                        }
+                    });
+                } else {
+                    throw err;
+                }
+            });
+        });
+    } catch (error) {
+        throw error;
+    }
+}
+
 async function getUser(email_id, password) {
     try {
         return new Promise((resolve, reject) => {
@@ -79,4 +107,4 @@ async function editMyProfile(details){
     }
 }
 
-export { getUser, addUser, editMyProfile };
+export { getAllUsers, getUser, addUser, editMyProfile };

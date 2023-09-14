@@ -8,7 +8,6 @@ function authenticateUser(req, res, next){
             const verifyToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
             verifyToken.iat = undefined;
             verifyToken.exp = undefined;
-            console.log({...verifyToken});
             req.user={...verifyToken};
             next();
         } catch(error) {

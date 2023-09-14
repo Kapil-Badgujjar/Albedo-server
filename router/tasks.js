@@ -1,13 +1,12 @@
 import {} from 'dotenv/config'
 import express from 'express';
 import authenticateUser from '../middlewares/authenticateMiddleware.js';
-import { fetchTasksByuUser } from '../services/taskServices.js';
+import { fetchAllTasks, fetchTasksByuUser, fetchLastTasks, addNewTask } from '../services/taskServices.js';
 const router = express.Router();
 
-router.route('/fetchtasksbyuser').get(authenticateUser, async (req,res)=>{
-    console.log(req.user);
+router.route('/fetchtasks').get(authenticateUser, async (req,res)=>{
     try{
-        const tasks = await fetchTasksByuUser(req.user.id);
+        const tasks = (req.user.role === 'Admin' ? await fetchAllTasks() :  await fetchTasksByuUser(req.user.id));
         if(tasks.length > 0) {
             res.status(200).send(tasks);
         }
@@ -17,7 +16,53 @@ router.route('/fetchtasksbyuser').get(authenticateUser, async (req,res)=>{
     } catch(error) {
         res.status(500).send({message: 'Internal Server Error'});
     }
-    // res.status(200).send([{id: 1, title: 'DSSSB', status: 'Assigned', deadline: '2023-09-15', assignedTo: 1, description: 'Complete your DSSSB form as soon as possible', tag: '#Job, #Govt Job'}]);
 });
 
+router.route('/fetchlasttasks').get(authenticateUser, async (req,res)=>{
+    try{
+        const tasks = await fetchLastTasks();
+        if(tasks.length > 0) {
+            res.status(200).send(tasks);
+        }
+        else {
+            res.status(200).send([]);
+        }
+    } catch(error) {
+        res.status(500).send({message: 'Internal Server Error'});
+    }
+});
+
+router.route('/addnewtask').post(authenticateUser, async (req, res) => {
+    if(req.user.role !== 'Admin') return res.status(403).send({message: 'You are not allowed to add new tasks'});
+    try{
+        const response = await addNewTask(req.body);
+        console.log(response)
+        res.status(200).send({message: 'task added successfully'});
+    } catch(err){
+        console.log(err);
+        res.status(500).send({message: err.message});
+    }
+});
+
+router.route('/updatetaskstatus').post(authenticateUser, async (req, res) => {
+    console.log(req.body);
+    if(req.user.role === 'Admin'){
+        //full update
+    } else if(req.user.role === 'User'){
+        //status update
+    } else {
+        res
+    }
+});
+
+router.route('/updatetask').post(authenticateUser, async (req, res) => {
+    console.log(req.body);
+    if(req.user.role === 'Admin'){
+        //full update
+    } else if(req.user.role === 'User'){
+        //status update
+    } else {
+        res
+    }
+});
 export default router;

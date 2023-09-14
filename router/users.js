@@ -1,7 +1,7 @@
 import {} from 'dotenv/config'
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { getUser, addUser, editMyProfile } from '../services/userServices.js';
+import { getUser, addUser, editMyProfile, getAllUsers } from '../services/userServices.js';
 import authenticateUser from '../middlewares/authenticateMiddleware.js';
 const router = express.Router();
 
@@ -42,5 +42,19 @@ router.route('/editmyprofile').post(authenticateUser, async(req, res)=>{
     }
 })
 
-
+router.route('/fetchallusers').get(authenticateUser, async (req, res) => {
+    if(req.user.role !== 'Admin'){
+        res.status(401).send({message: 'You are not allowed to access this page.'});
+        return;
+    }
+    try{
+        const {status, users} = await getAllUsers();
+        if(status){
+            res.status(200).send(users);
+        }
+        else res.status(404).send({message: 'Not Found'});
+    } catch(error){
+        res.status(500).send({message: 'Internal Server Error'});
+    }
+});
 export default router;
