@@ -7,7 +7,7 @@ async function fetchComments(taskid) {
             pool.getConnection((error, connection) => {
                 if(!error){
                     connection.connect();
-                    const query = 'SELECT * FROM comments WHERE task_id = ?';
+                    const query = 'SELECT c.id, c.comment, u.username FROM comments AS c INNER JOIN users AS u ON c.user_id = u.id WHERE task_id = ?';
                     connection.query(query, [taskid], (err, result) => {
                         connection.release();
                         if(err){

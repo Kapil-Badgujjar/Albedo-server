@@ -1,7 +1,7 @@
 import {} from 'dotenv/config'
 import express from 'express';
 import jwt from 'jsonwebtoken';
-import { getUser, addUser, editMyProfile, getAllUsers } from '../services/userServices.js';
+import { getUser, addUser, editMyProfile, getAllUsers, updateUserRole } from '../services/userServices.js';
 import authenticateUser from '../middlewares/authenticateMiddleware.js';
 const router = express.Router();
 
@@ -54,6 +54,19 @@ router.route('/fetchallusers').get(authenticateUser, async (req, res) => {
         }
         else res.status(404).send({message: 'Not Found'});
     } catch(error){
+        res.status(500).send({message: 'Internal Server Error'});
+    }
+});
+
+router.route('/updateuserrole').post(authenticateUser, async (req, res) => {
+    if(req.user.id === req.body.id) {
+        res.status(401).send({message: 'Unauthorized'});
+        return;
+    }
+    try {
+        const result = await updateUserRole(req.body.id, req.body.role);
+        res.status(200).send({message: 'Success'});
+    } catch(err) {
         res.status(500).send({message: 'Internal Server Error'});
     }
 });
