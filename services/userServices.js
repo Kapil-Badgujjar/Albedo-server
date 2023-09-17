@@ -56,6 +56,32 @@ async function getUser(email_id, password) {
     }
 }
 
+async function getUserById(id){
+    try {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err, connection)=>{
+                if(!err) {
+                    connection.connect();
+                    const query = 'SELECT id, email_id, username, role FROM users WHERE id = ?';
+                    connection.query(query, [id], (error,results) => {
+                        connection.release();
+                        if(error){
+                            console.log(error);
+                            reject(error);
+                        } else {
+                            resolve(results);
+                        }
+                    });
+                } else {
+                    throw err;
+                }
+            });
+        });
+    } catch(error) {
+        throw error;
+    }
+}
+
 async function addUser(email_id, password, username){
     try {
         return new Promise((resolve, reject) => {
@@ -63,32 +89,60 @@ async function addUser(email_id, password, username){
                 if(!err){
                     connection.connect();
                     const query = 'INSERT INTO users(email_id, password, username, role) VALUES(?, ?, ?, ?)';
-                        connection.query(query, [email_id, password, username, "User"], (error, results) => {
-                            connection.release();
-                            if (error) {
-                                reject(error);
-                            } else {
-                                resolve(results);
-                            }
-                        });
-                    } else {
-                        throw err;
-                    }
-                });
+                    connection.query(query, [email_id, password, username, "User"], (error, results) => {
+                        connection.release();
+                        if (error) {
+                            // console.log(error);
+                            reject(error);
+                        } else {
+                            resolve(results);
+                        }
+                    });
+                } else {
+                    throw err;
+                }
             });
+        })
     } catch (error) {
+        console.log(error);
         throw error;
     }
 }
 
-async function editMyProfile(details){
+async function editMyProfile(id, username, email_id){
     try {
         return new Promise((resolve, reject) => {
             pool.getConnection((err, connection)=>{
                 if(!err) {
                     connection.connect();
-                    const query = 'UPDATE users SET email_id = ?, password = ?, username = ? WHERE id = ?';
-                    connection.query(query, [details.email_id, details.password, details.username, details.id], (error,results) => {
+                    const query = 'UPDATE users SET email_id = ?, username = ? WHERE id = ?';
+                    connection.query(query, [email_id, username, id], (error,results) => {
+                        connection.release();
+                        if(error){
+                            console.log(error);
+                            reject(error);
+                        } else {
+                            resolve(results);
+                        }
+                    });
+                } else {
+                    throw err;
+                }
+            });
+        });
+    } catch(error) {
+        throw error;
+    }
+}
+
+async function updateMyPassword(id, password) {
+    try {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err, connection)=>{
+                if(!err) {
+                    connection.connect();
+                    const query = 'UPDATE users SET password = ? WHERE id = ?';
+                    connection.query(query, [password, id], (error,results) => {
                         connection.release();
                         if(error){
                             console.log(error);
@@ -132,4 +186,30 @@ async function updateUserRole(id, role){
         throw error;
     }
 }
-export { getAllUsers, getUser, addUser, editMyProfile, updateUserRole };
+
+async function getEmail(id){
+    try {
+        return new Promise((resolve, reject) => {
+            pool.getConnection((err, connection)=>{
+                if(!err) {
+                    connection.connect();
+                    const query = 'SELECT email_id FROM users WHERE id = ?';
+                    connection.query(query, [id], (error,results) => {
+                        connection.release();
+                        if(error){
+                            console.log(error);
+                            reject(error);
+                        } else {
+                            resolve(results);
+                        }
+                    });
+                } else {
+                    throw err;
+                }
+            });
+        });
+    } catch(error) {
+        throw error;
+    }
+}
+export { getAllUsers, getUser, getUserById, addUser, editMyProfile, updateMyPassword, updateUserRole, getEmail };

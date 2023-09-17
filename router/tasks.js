@@ -2,6 +2,8 @@ import {} from 'dotenv/config'
 import express from 'express';
 import authenticateUser from '../middlewares/authenticateMiddleware.js';
 import { fetchAllTasks, fetchTasksByuUser, fetchLastTasks, addNewTask, getStatsAdmin, getStatsByUser, updateTask, updateStatus } from '../services/taskServices.js';
+import { getEmail } from '../services/userServices.js';
+import { sendTaskAssignedMail } from '../utils/sendGridEmail.js';
 const router = express.Router();
 
 router.route('/fetchtasks').get(authenticateUser, async (req,res)=>{
@@ -35,7 +37,11 @@ router.route('/fetchlasttasks').get(authenticateUser, async (req,res)=>{
 router.route('/addnewtask').post(authenticateUser, async (req, res) => {
     if(req.user.role !== 'Admin') return res.status(403).send({message: 'You are not allowed to add new tasks'});
     try{
-        const response = await addNewTask(req.body);
+        const response = await addNewTask(req.body).then(async (response) =>{
+            const result = await getEmail(req.body.assignedTo);
+            if(result) sendTaskAssignedMail(result[0].email_id);
+            return response;
+        })
         console.log(response)
         res.status(200).send({message: 'task added successfully'});
     } catch(err){

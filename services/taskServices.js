@@ -58,7 +58,7 @@ async function fetchLastTasks(){
             pool.getConnection((error, connection) => {
                 if(!error){
                     connection.connect();
-                    const query = 'SELECT * FROM tasks ORDER BY id DESC LIMIT 1';
+                    const query = 'SELECT t.id, t.title, t.status, t.tags, t.description, t.deadline, u.username FROM tasks AS t INNER JOIN users AS u ON u.id = t.assigned_to ORDER BY id DESC LIMIT 1';
                     connection.query(query, (err, result) => {
                         connection.release();
                         if(err){
