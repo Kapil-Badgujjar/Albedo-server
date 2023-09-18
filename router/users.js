@@ -3,6 +3,7 @@ import express from 'express';
 import jwt from 'jsonwebtoken';
 import { getUser, addUser, editMyProfile, getAllUsers, updateUserRole, getUserById, updateMyPassword } from '../services/userServices.js';
 import authenticateUser from '../middlewares/authenticateMiddleware.js';
+import { sendSignupMail } from '../utils/sendGridEmail.js'
 const router = express.Router();
 
 router.route('/login').post(async (req, res)=>{
@@ -28,7 +29,9 @@ router.route('/signup').post(async (req, res) => {
     const pattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     if(!emailPattern.test(req.body.email)||!pattern.test(req.body.password)) return res.status(400).send('Please enter proper values');
     try{
-        addUser(req.body.email, req.body.password, req.body.username).then((response) => { sendSignupMail(req.body.email); res.status(200).send({ data: response, message: 'Successfully Signed Up!' })}).catch((error)=>{ res.status(400).send('User alredy exists');});
+        await addUser(req.body.email, req.body.password, req.body.username);
+        sendSignupMail(req.body.email); 
+        res.status(200).send({ data: true, message: 'Successfully Signed Up!'})
     } catch(error){
         res.status(500).send({message: 'Internal Server Error'});
     }

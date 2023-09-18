@@ -33,10 +33,10 @@ router.route('/fetchlasttasks').get(authenticateUser, async (req,res)=>{
 router.route('/addnewtask').post(authenticateUser, async (req, res) => {
     if(req.user.role !== 'Admin') return res.status(403).send({message: 'You are not allowed to add new tasks'});
     try{
-        await addNewTask(req.body).then(async (response) =>{
+        addNewTask(req.body).then(async () =>{
             const result = await getEmail(req.body.assignedTo);
             if(result) sendTaskAssignedMail(result[0].email_id);
-            return response;
+            return;
         }).then(() => {res.status(200).send({token: req.user.newToken||undefined, data: {}, message: 'task added successfully'});}).catch(error => {throw error;});
     } catch(err){
         res.status(500).send({message: err.message});
