@@ -65,7 +65,7 @@ router.route('/fetchallusers').get(authenticateUser, async (req, res) => {
         const token = req.user.newToken||undefined;
         const {status, users} = await getAllUsers();
         if(status){
-            res.status(200).send(users);
+            res.status(200).send({token: req.user.newToken||undefined, data:users, message: 'Users fetched successfully'});
         }
         else res.status(404).send({message: 'Not Found'});
     } catch(error){
@@ -79,8 +79,7 @@ router.route('/updateuserrole').post(authenticateUser, async (req, res) => {
         return;
     }
     try {
-        const result = await updateUserRole(req.body.id, req.body.role);
-        res.status(200).send({message: 'Success'});
+        await updateUserRole(req.body.id, req.body.role).then(data => { res.status(200).send({token: req.user.newToken||undefined, data: {id: req.body.id, role: req.body.role},message: 'Updated!'})}).catch(error => { throw error; });
     } catch(err) {
         res.status(500).send({message: 'Internal Server Error'});
     }

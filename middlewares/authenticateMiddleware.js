@@ -6,9 +6,14 @@ function authenticateUser(req, res, next){
     if(token) {
         try{
             const verifyToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-            verifyToken.iat = undefined;
-            verifyToken.exp = undefined;
-            req.user={...verifyToken};
+            const userDetails = { id: verifyToken.id, username: verifyToken.username, email_id: verifyToken.email_id, role: verifyToken.role}
+            
+
+            // Smart token refresh using expiry time check
+            const currentTime = Number(new Date().getTime().toString().slice(0,10));
+            const newToken = verifyToken.exp - currentTime < 600 ? jwt.sign({...userDetails}, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '30m'}) : undefined;
+
+            req.user={...userDetails, newToken};
             next();
         } catch(error) {
             console.log(error);
