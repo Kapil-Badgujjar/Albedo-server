@@ -47,7 +47,7 @@ router.route('/updatetaskstatus').post(authenticateUser, async (req, res) => {
     try{
         await updateStatus(req.body.id, req.body.status).then(() => { res.status(200).send({token: req.user.newToken||undefined, data: {}, message: 'Updating status successfully'})}).catch(err => {throw err});
     } catch (error) {
-        res.status(500).send({message: 'Internal Server Error'});
+        res.status(400).send({message: 'Bad request'});
     }
 });
 

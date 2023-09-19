@@ -33,7 +33,7 @@ router.route('/signup').post(async (req, res) => {
         sendSignupMail(req.body.email); 
         res.status(200).send({ data: true, message: 'Successfully Signed Up!'})
     } catch(error){
-        res.status(500).send({message: 'Internal Server Error'});
+        res.status(400).send({message: 'Signup Failed'});
     }
 })
 
@@ -77,14 +77,12 @@ router.route('/fetchallusers').get(authenticateUser, async (req, res) => {
 });
 
 router.route('/updateuserrole').post(authenticateUser, async (req, res) => {
-    if(req.user.id === req.body.id) {
-        res.status(401).send({message: 'Unauthorized'});
-        return;
-    }
+    if(req.user.id === req.body.id) return res.status(401).send({message: 'Unauthorized'});
+    if(req.user.role !== 'Admin') return res.status(401).send({message: 'Unauthorized'});
     try {
-        await updateUserRole(req.body.id, req.body.role).then(data => { res.status(200).send({token: req.user.newToken||undefined, data: {id: req.body.id, role: req.body.role},message: 'Updated!'})}).catch(error => { throw error; });
+        updateUserRole(req.body.id, req.body.role).then(data => { res.status(200).send({token: req.user.newToken||undefined, data: {id: req.body.id, role: req.body.role},message: 'Updated!'})}).catch(error => { throw error; });
     } catch(err) {
-        res.status(500).send({message: 'Internal Server Error'});
+        res.status(404).send({message: 'Some Error occurred!'});
     }
 });
 export default router;

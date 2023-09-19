@@ -16,8 +16,7 @@ function authenticateUser(req, res, next){
             req.user={...userDetails, newToken};
             next();
         } catch(error) {
-            console.log(error);
-            res.status(500);
+            res.status(401).send({message: 'Unauthorized'});
         }
     }
 }
