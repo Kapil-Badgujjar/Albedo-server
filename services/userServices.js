@@ -1,4 +1,5 @@
 import pool from '../utils/database.js';
+import bcrypt from "bcrypt";
 
 async function getAllUsers() {
     try {
@@ -30,20 +31,27 @@ async function getAllUsers() {
 
 async function getUser(email_id, password) {
     try {
-        return new Promise((resolve, reject) => {
-            pool.getConnection((err,connection) => {
-                if(!err){
+        return new Promise(async (resolve, reject) => {
+            pool.getConnection((err, connection) => {
+                if (!err) {
                     connection.connect();
-                    const query = 'SELECT * FROM users WHERE email_id = ? AND password = ?';
-                    connection.query(query, [email_id, password], (error, results) => {
+                    const query = 'SELECT * FROM users WHERE email_id = ?';
+                    connection.query(query, [email_id], async (error, results) => {
                         connection.release();
                         if (error) {
                             reject(error);
                         } else {
-                            if(results.length > 0)
-                                resolve({status: true, user: results[0]});
-                            else
-                                resolve({status: false, user: undefined});
+                            if (results.length > 0) {
+                                const user = results[0];
+                                const passwordMatch = await bcrypt.compare(password, user.password);
+                                if (passwordMatch) {
+                                    resolve({ status: true, user });
+                                } else {
+                                    resolve({ status: false, user: undefined });
+                                }
+                            } else {
+                                resolve({ status: false, user: undefined });
+                            }
                         }
                     });
                 } else {
@@ -83,13 +91,15 @@ async function getUserById(id){
 }
 
 async function addUser(email_id, password, username){
+
+    const hashedPassword = await bcrypt.hash(password, 10); 
     try {
         return new Promise((resolve, reject) => {
             pool.getConnection((err, connection) =>{
                 if(!err){
                     connection.connect();
                     const query = 'INSERT INTO users(email_id, password, username, role) VALUES(?, ?, ?, ?)';
-                    connection.query(query, [email_id, password, username, "User"], (error, results) => {
+                    connection.query(query, [email_id, hashedPassword, username, "User"], (error, results) => {
                         connection.release();
                         if (error) {
                             // console.log(error);
