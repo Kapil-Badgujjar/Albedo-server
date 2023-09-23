@@ -159,7 +159,7 @@ async function getStatsByUser(userid){
             pool.getConnection((err, connection) => {
                 if(!err) {
                     connection.connect();
-                    connection.query("SELECT SUM(CASE WHEN status = 'Assigned' THEN 1 ELSE 0 END) AS assigned, SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) AS inprogress, SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) AS done FROM tasks",[userid], (error, result) => {
+                    connection.query("SELECT SUM(CASE WHEN status = 'Assigned' THEN 1 ELSE 0 END) AS assigned, SUM(CASE WHEN status = 'In Progress' THEN 1 ELSE 0 END) AS inprogress, SUM(CASE WHEN status = 'Done' THEN 1 ELSE 0 END) AS done FROM tasks WHERE assigned_to = ?",[userid], (error, result) => {
                         connection.release();
                         if(error) {
                             reject(error);
